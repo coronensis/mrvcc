@@ -1,0 +1,38 @@
+
+yacc cparser.y
+mv y.tab.c cparser.c
+cc -c cparser.c
+
+cc -c AST.c
+
+cc -o tiny-c-run interp_main.o AST.o cparser.o interp.o interp_expr.o
+
+tiny-c-run < sample.c
+
+cc -o st_machine st_machine.o st_code.o
+
+cc -o tiny-cc-st compiler_main.o AST.o cparser.o st_compile.o \
+     st_compile_expr.o st_code_gen.o st_code.o
+
+tiny-cc-st < sample.c > output.st
+
+st_machine < output.st
+
+cc -o tiny-cc-x86 compiler_main.o AST.o cparser.o reg_compile.o \
+       reg_compile_expr.o x86_code_gen.o
+
+tiny-cc-x86 < sample.c > output.s
+
+cc -m32 output.s println.c
+
+./a.out
+
+
+
+
+
+
+
+
+
+

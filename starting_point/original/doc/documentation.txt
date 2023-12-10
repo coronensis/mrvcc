@@ -1,0 +1,220 @@
+
+About tiny C
+
+2012/10/23: tiny-c.tgz updated. The update is as follows
+
+    If you get a yacc error on Mac or other devices, try changing void yyerror() to int yyerror() in clex.c.
+    The compiler for interpreters and stack machines has been changed to work in 64-bit mode.
+    Compiler for Intel x86 processors now works on both MacOX and Linx. The output code is in 32-bit mode, so please compile it with -m32 when you compile it.
+
+In this lecture, specific code will be explained as the lecture progresses. As an example of code, we will use tiny C, a very simple C-like programming language. In the lecture, you will learn how to write code in tiny C using the
+
+    Interpreter
+    Compiler to Stack Machine
+    Compiler for Intel x86 processors
+
+The following is a brief introduction to the
+
+Language specification of tiny C
+
+The following is the language specification of tiny C.
+
+    The only data type that can be used is integer.
+    Arrays of integer type are one-dimensional only.
+    Local variables can be declared in functions.
+    In addition to if statements, while and for statements are supported.
+    Supported operators are +, -, *, and <, > for comparison.
+    The system function is the println function for output, which calls printf. Only here can a string be used to specify the format.
+    No split compilation.
+    No pointers, of course.
+    Main as in C.
+    Since pre-processor is not passed through, #include, etc. is not possible.
+
+The following is a program written in tiny-C that adds from 0 to 10 and prints the result.
+
+    main()
+    {
+        var i,s;
+        s = 0;
+        i = 0;
+        while(i < 10){
+     s = s + i;
+     i = i + 1;
+        }
+        println("s = %d",s);
+    }
+
+When using arrays and functions, use the following
+
+    var A[10];
+
+    main()
+    {
+        var i;
+        for(i = 0; i < 10; i = i + 1) A[i] = i;
+        println("s = %d",arraySum(A,10));
+    }
+
+    arraySum(a,n)
+    {
+        var i,s;
+        s = 0;
+        for(i = 0; i < 10; i = i + 1) s = s + a[i];
+        return s;
+    }
+
+Note that we have not made any for statements. Other necessary functions, such as operators, should be made by students in their own exercises.
+
+Syntax of tiny C
+
+The following is a simple grammar in BNF format.
+
+    Lower case letters indicate non-terminal symbols. However, variable_name, function_name, array_name, and parameter are identifiers.
+    Upper case letters are terminators. IF, RETURN, WHILE, FOR, and PRINTLN in capital letters are keywords. NUMBER is a decimal number. string.
+    ' ' is a one-character terminator.
+    {...} * is the ... indicates zero or more repetitions of the "...}" part.
+    [ ] indicates an optional part.
+
+    Syntax of tiny C
+
+    program := {external_definition}*
+
+    external_definition:=
+       function_name '(' [ parameter {','parameter}* ] ')' compound_statement
+     | VAR variable_name ['=' expr] ';'
+     | VAR array_name '[' expr ']' ';'
+
+    compound_statement:=
+            '{' [local_variable_declaration] {statement}* '}'
+
+    local_variable_declaration: =
+             VAR variable_name [ {',' variable_name}* ] ';'
+
+    statement :=
+      expr ';'
+     | compound_statement
+     | IF '(' expr ')' statement [ ELSE statement ]
+     | RETURN [expr ] ';'
+     | WHILE '(' expr ')' statement
+     | FOR '(' expr ';' expr ';' expr ')' statement
+
+    expr:= primary_expr
+     | variable_name '=' expr
+     | array_name '[' expr ']' '=' expr
+     | expr '+' expr
+     | expr '-' expr
+     | expr '*' expr
+     | expr '<' expr
+     | expr '>' expr
+
+    primary_expr:=
+       variable_name
+     | NUMBER
+     | STRING
+     | array_name '[' expr ']'
+     | function_name '(' expr [{',' expr}*] ')'
+     | function_name '(' ')''
+     | '(' expr ')'
+     | PRINTLN '(' STRING ',' expr ')''
+
+Source Code
+
+Note: This source code is not complete. It has been simplified in various ways for illustrative purposes. The "right program works right" but the checks for wrong programs are not complete.
+
+    Parser (common to interpreter and compiler)
+        AST.h: Definition file of basic data structures such as syntax trees
+        AST.c: Syntax tree data structures and other basic data structures
+        cparser.y : yacc program for parser
+        clex.c: lexical analysis part
+        How to create a parser (create cparser.o)
+
+        % yacc cparser.y
+        % mv y.tab.c cparser.c
+        % cc -c cparser.c
+
+        AST.o should be made.
+
+        % cc -c AST.c
+
+    Interpreter
+        interp.h : header of interpreter
+        interp_main.c : interpreter main
+        interp.c : Interpreter functions, statement processing
+        interp_expr.c: Interpreter expression processing
+        How to create an interpreter (tiny-c-run)
+            Compile each *.c
+            Link below
+
+            % cc -o tiny-c-run interp_main.o AST.o cparser.o interp.o interp_expr.o
+
+        Run the interpreter (tiny-c-run).
+            Prepare tiny C program (sample.c)
+            Input from standard input.
+
+            % tiny-c-run < sample.c
+
+    Compiler to stack machine
+        st_compile.h : compiler header for stack machine
+        st_code.h: Define the code of the stack machine
+        compiler_main.c : compiler main
+        st_compile.c : Stack machine compiler function and statement processing
+        st_compile_expr.c : Stack machine compiler expression processing
+        st_code_gen.c : Stack machine code generation
+        st_code.c : Stack machine related functions
+        st_machine.c : Stack machine interpreter
+        How to create a stack machine (st_machine)
+
+        % cc -o st_machine st_machine.o st_code.o
+
+        How to make a compiler (tiny-cc-st)
+            Compile each *.c
+            Link below
+
+            % cc -o tiny-cc-st compiler_main.o AST.o cparser.o st_compile.o \
+                 st_compile_expr.o st_code_gen.o st_code.o
+
+        Compile with compiler (tiny-cc-st)
+            Prepare tiny C program (sample.c)
+            Input from standard input and output to object code output.st
+
+            % tiny-cc-st < sample.c > output.st
+
+            Run on stack machine st_machine
+
+            % st_machine < output.st
+
+   Compiler to register machine (x86)
+        reg_compile.h: header for compiler to register machine
+        reg_code.h: Intermediate code definition for register machine
+        compiler_main.c: compiler main
+        reg_compile.c: Processing compiler functions and statements for register machines
+        reg_compile_expr.c: Compiler expression processing for register machine
+        x86_code_gen.c: Code generation for x86
+        println.c : println library function
+        How to create a compiler (tiny-cc-x86)
+            Compile each *.c
+            Link below
+
+            % cc -o tiny-cc-x86 compiler_main.o AST.o cparser.o reg_compile.o \
+                   reg_compile_expr.o x86_code_gen.o
+
+        Compile with compiler (tiny-cc-x86)
+            Prepare tiny C program (sample.c)
+            Input from standard input and output to object code output.s
+
+            % tiny-cc-x86 < sample.c > output.s
+
+            Assemble object code, link with library (println.c) (don't forget -m32 option!)
+
+            % cc -m32 output.s println.c
+
+            Execution
+
+            % . /a.out
+
+    Makefile
+    All Sources
+
+
+
+
