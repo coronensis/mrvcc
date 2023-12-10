@@ -18,7 +18,6 @@ void comment(void);
 "else"		  { return TOK_ELSE; }
 "while"		  { return TOK_WHILE; }
 "return"	  { return TOK_RETURN; }
-"println"	  { return TOK_PRINTLN; }
 
 {L}({L}|{D})*	  { yylval.node = new_identifier_node(yytext); return TOK_IDENTIFIER; }
 
@@ -26,15 +25,34 @@ void comment(void);
 
 \"(\\.|[^\\"])*\" { yylval.node = new_string_node(yytext); return TOK_STRING; }
 
+"++"		  { return TOK_INC; }
+"--"		  { return TOK_DEC; }
+"<<"		  { return TOK_SLL; }
+">>"		  { return TOK_SRL; }
+"&&"		  { return TOK_LOGICAL_AND; }
+"||"		  { return TOK_LOGICAL_OR; }
+"<="		  { return TOK_LE; }
+">="		  { return TOK_GE; }
+"=="		  { return TOK_EQ; }
+"!="		  { return TOK_NE; }
+
 "+"		  { return '+'; }
 "-"		  { return '-'; }
 "*"		  { return '*'; }
+"/"		  { return '/'; }
+"%"		  { return '%'; }
+"&"		  { return '&'; }
+"|"		  { return '|'; }
+"^"		  { return '^'; }
+"~"		  { return '~'; }
 ">"		  { return '>'; }
 "<"		  { return '<'; }
 "("		  { return '('; }
 ")"		  { return ')'; }
 "{"		  { return '{'; }
 "}"		  { return '}'; }
+"["		  { return '['; }
+"]"		  { return ']'; }
 ";"		  { return ';'; }
 ","		  { return ','; }
 "="		  { return '='; }

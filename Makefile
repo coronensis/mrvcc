@@ -7,11 +7,9 @@ mrvcc: parser.y lexer.l compiler.c
 
 tst:
 	./mrvcc tests/sample.c >sample.s
-	gcc -m32 sample.s println.c -o sample
-	./sample
-
-rv:
-	./mrvcc demo.c >demo.s
+	riscv32-unknown-elf-gcc -Werror -Wall -pedantic -std=gnu99 -ffreestanding -nostdlib -march=rv32i -mabi=ilp32 -O0 -c sample.s
+	riscv32-unknown-elf-objdump -d sample.o
+	cat sample.s
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h y.output *.o mrvcc sample.s sample
